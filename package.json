@@ -1,0 +1,29 @@
+{
+  "name": "@cookshack/codemirror-ansi",
+  "version": "0.1.0",
+  "description": "ASNI escape code extension for Codemirror 6",
+  "homepage": "https://git.sr.ht/~mattmundell/codemirror-ansi",
+  "scripts": {
+    "prepare": "rollup -c"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://git.sr.ht/~mattmundell/codemirror-ansi"
+  },
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "sideEffects": false,
+  "license": "MIT",
+  "devDependencies": {
+    "rollup": "^4.21.3"
+  },
+  "dependencies": {
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/view": "^6.33.0"
+  }
+}
