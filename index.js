@@ -48,7 +48,9 @@ clrs[32] = Decoration.mark({ attributes: { class: "cm-ansi-green" } })
 clrs[36] = Decoration.mark({ attributes: { class: "cm-ansi-cyan" } })
 
 hide = Decoration.replace({})
-csRe = /\x1B\[32m/g
+// https://en.wikipedia.org/wiki/ANSI_escape_code#SGR
+//csRe = /\x1B\[32m/g
+csRe = /\x1B\[[0-9]*m/gd
 
 function stripeDeco(view) {
   let step = view.state.facet(stepSize)
@@ -62,13 +64,26 @@ function stripeDeco(view) {
 
       line = view.state.doc.lineAt(pos)
 
-      if (1) {
+      if (0) {
         let match
 
         csRe.lastIndex = 0
         match = csRe.exec(line.text)
-        if (match)
-          builder.add(line.from + match.index, line.from + csRe.lastIndex, hide)
+        if (match) {
+          console.log({match})
+          //builder.add(line.from + match.index, line.from + csRe.lastIndex, hide)
+          builder.add(line.from + match.indices[0][0], line.from + match.indices[0][1], hide)
+        }
+      }
+
+      if (1) {
+        csRe.lastIndex = 0
+        ;[...line.text.matchAll(csRe)].forEach(match => {
+          console.log({match})
+          builder.add(line.from + match.indices[0][0],
+                      line.from + match.indices[0][1],
+                      hide)
+        })
       }
 
       if (0)
