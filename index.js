@@ -73,7 +73,7 @@ csRe = /\x1B\[([0-9]*)((?:;[0-9]+)*)m/gd  // (?: ) is non capturing group
 
 function decoLine
 (builder, cache, line) {
-  let fg, bold, ranges, hit
+  let fg, bold, ranges, hit, matches
 
   function add
   (from, len /* of marker */, to, num) {
@@ -149,7 +149,8 @@ function decoLine
   fg = hit?.fg || 0
   bold = hit?.bold || 0
   csRe.lastIndex = 0
-    ;[...line.text.matchAll(csRe)].forEach(match => {
+  matches = line.text.matchAll(csRe)
+  matches.forEach(match => {
     let start, end
     start = match.indices[0][0]
     end = match.indices[0][1]
