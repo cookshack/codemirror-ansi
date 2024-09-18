@@ -90,8 +90,15 @@ function decoLine
   function push
   (attr) {
     d({attr})
-    if (attr.fg == undefined)
+    if (attr.from == undefined)
+      // pushing for the line cache, eg for reset
+      attr.skipStyle = 1
+    else if (attr.fg == undefined) {
+      // this "attribute" hides the control sequence
       attr.dec = hide
+      // cache is for attributes that affect the style
+      attr.skipCache = 1
+    }
     else
       attr.dec = attr.bold ? clrs[attr.fg].bold : clrs[attr.fg].norm
     ranges.push(attr)
@@ -111,6 +118,7 @@ function decoLine
     // reset
     if (num == 0) {
       fg = 0
+      push({ bold: 0, fg: fg }) // dummy, for cache
       boldOff()
       return
     }
@@ -169,9 +177,9 @@ function decoLine
   if (line.number > 0)
     hit = cache[line.number - 1]
   if (hit) {
-    //d('hit ' + line.number)
-    //d('fg ' + hit.fg)
-    //d('bold ' + hit.bold)
+    d('hit ' + line.number)
+    d('fg ' + hit.fg)
+    d('bold ' + hit.bold)
   }
   fg = hit?.fg || 0
   bold = hit?.bold || 0
@@ -195,12 +203,12 @@ function decoLine
       })
     }
   })
-  ranges.forEach(r => builder.add(r.from, r.to, r.dec))
+  ranges.forEach(r => r.skipStyle || builder.add(r.from, r.to, r.dec))
   if (ranges.length) {
-    cache[line.number] = ranges.filter(r => r.dec != hide).at(-1)
-    //d('cached ' + line.number)
-    //d('fg ' + ranges.at(-1).fg)
-    //d('bold ' + ranges.at(-1).bold)
+    cache[line.number] = ranges.filter(r => r.skipCache).at(-1)
+    d('cached ' + line.number)
+    d('fg ' + cache[line.number].fg)
+    d('bold ' + cache[line.number].bold)
   }
 }
 
