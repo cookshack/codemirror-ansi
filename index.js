@@ -10,20 +10,16 @@ function clr
 (name, color) {
   let css
   css = 'cm-ansi-' + name
-  if (color) {
+  if (color)
     style['.' + css] = { color: color }
-    style['.' + css + '-bold'] = { color: color, fontWeight: 'bold' }
-  }
-  else {
+  else
     // special case for plain bold (num 1)
     style['.' + css] = {}
-    style['.' + css + '-bold'] = { fontWeight: 'bold' }
-  }
   return { norm: Decoration.mark({ attributes: { class: css } }),
-           bold: Decoration.mark({ attributes: { class: css + '-bold' } }) }
+           bold: Decoration.mark({ attributes: { class: css + ' cm-ansi-bold' } }) }
 }
 
-style = {}
+style = { '.cm-ansi-bold': { fontWeight: 'bold' } }
 clrs = []
 clrs[1] = clr('text', null)
 clrs[30] = clr('black', '#000000')
