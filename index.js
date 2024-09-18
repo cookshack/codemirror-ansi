@@ -63,8 +63,13 @@ import {RangeSetBuilder} from "@codemirror/state"
 let hide, csRe
 
 hide = Decoration.replace({})
+// Select Graphic Rendition
 // https://en.wikipedia.org/wiki/ANSI_escape_code#SGR
-csRe = /\x1B\[([0-9]*)m/gd
+// ESC[m
+// ESC[1m
+// ESC[1;32m
+// ESC[1;32;43m
+csRe = /\x1B\[([0-9]*)((?:;[0-9]+)*)m/gd  // (?: ) is non capturing group
 
 function stripeDeco(view) {
   let step, builder, cache
@@ -135,6 +140,14 @@ function stripeDeco(view) {
           fg = 0
         }
 
+        function addAttr
+        (line, start, end, slice) {
+          let num
+          num = parseInt(slice)
+          console.log({num})
+          add(line.from + start, end - start, line.to, num)
+        }
+
         function addGroup
         (line, start, end, group) {
           let slice, num
@@ -165,6 +178,16 @@ function stripeDeco(view) {
           start = match.indices[0][0]
           end = match.indices[0][1]
           addGroup(line, start, end, match.indices[1])
+          if (match.indices.length > 2) {
+            let group2
+            group2 = match.indices[2]
+            if (group2[0] == group2[1])
+              return
+            line.text.slice(group2[0], group2[1]).split(';').forEach(attr => {
+              if (attr.length)
+                addAttr(line, start, end, attr)
+            })
+          }
         })
         ranges.forEach(r => builder.add(r.from, r.to, r.dec))
         if (ranges.length) {
