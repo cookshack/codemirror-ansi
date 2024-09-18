@@ -5,8 +5,8 @@ let d = console.log
 import {EditorView} from "@codemirror/view"
 
 const baseTheme = EditorView.baseTheme({
-  "&light .cm-ansi": {backgroundColor: "#d4fafa"},
-  "&dark .cm-ansi": {backgroundColor: "#1a2727"},
+  ".cm-ansi-text": {},
+  ".cm-ansi-text-bold": { fontWeight: 'bold' },
   ".cm-ansi-green": { color: '#00AA00' },
   ".cm-ansi-cyan": { color: '#00AAAA' },
   ".cm-ansi-green-bold": { color: '#00AA00', fontWeight: 'bold' },
@@ -41,12 +41,6 @@ let CSI, clrs, hide, csRe
 // control sequence introducer
 CSI = "\x1B["
 
-const stripeL = Decoration.line({
-  attributes: {class: "cm-ansi"}
-})
-
-const stripe = Decoration.mark({ attributes: { class: "cm-ansi" } })
-
 function clr
 (css) {
   return { norm: Decoration.mark({ attributes: { class: css } }),
@@ -54,8 +48,10 @@ function clr
 }
 
 clrs = []
+clrs[1] = clr('cm-ansi-text')
 clrs[32] = clr('cm-ansi-green')
 clrs[36] = clr('cm-ansi-cyan')
+d({clrs})
 
 hide = Decoration.replace({})
 // https://en.wikipedia.org/wiki/ANSI_escape_code#SGR
@@ -109,6 +105,16 @@ function stripeDeco(view) {
           }
           if (num == 39)
             num = 0
+          if (num == 22) {
+            // normal weight
+            return
+          }
+          if (num == 1) {
+            // bold weight
+            fg = 1
+            ranges.push({ from: from + len, to: to, dec: clrs[1].bold })
+            return
+          }
           if (clrs[num]) {
             fg = num
             ranges.push({ from: from + len, to: to, dec: clrs[num].norm })
@@ -132,7 +138,7 @@ function stripeDeco(view) {
             builder.add(line.from + start,
                         line.from + end,
                         hide)
-          add(line.from + start, end, line.to, num)
+          add(line.from + start, end - start, line.to, num)
         })
         d({ranges})
         ranges.forEach(r => builder.add(r.from, r.to, r.dec))
