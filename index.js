@@ -1,17 +1,35 @@
-let d = console.log
+let d, clrs, style
+
+d = console.log
 
 //!baseTheme
 
 import {EditorView} from "@codemirror/view"
 
-const baseTheme = EditorView.baseTheme({
-  ".cm-ansi-text": {},
-  ".cm-ansi-text-bold": { fontWeight: 'bold' },
-  ".cm-ansi-green": { color: '#00AA00' },
-  ".cm-ansi-cyan": { color: '#00AAAA' },
-  ".cm-ansi-green-bold": { color: '#00AA00', fontWeight: 'bold' },
-  ".cm-ansi-cyan-bold": { color: '#00AAAA', fontWeight: 'bold' }
-})
+function clr
+(name, color) {
+  let css
+  css = 'cm-ansi-' + name
+  if (color) {
+    style['.' + css] = { color: color }
+    style['.' + css + '-bold'] = { color: color, fontWeight: 'bold' }
+  }
+  else {
+    // special case for plain bold (num 1)
+    style[css] = {}
+    style[css + '-bold'] = { fontWeight: 'bold' }
+  }
+  return { norm: Decoration.mark({ attributes: { class: css } }),
+           bold: Decoration.mark({ attributes: { class: css + '-bold' } }) }
+}
+
+style = {}
+clrs = []
+clrs[1] = clr('text', null)
+clrs[32] = clr('green', '#00AA00')
+clrs[36] = clr('cyan', '#00AAAA')
+
+const baseTheme = EditorView.baseTheme(style)
 
 //!facet
 
@@ -36,19 +54,7 @@ export function ansi(options = {}) {
 import {Decoration} from "@codemirror/view"
 import {RangeSetBuilder} from "@codemirror/state"
 
-let clrs, hide, csRe
-
-function clr
-(css) {
-  return { norm: Decoration.mark({ attributes: { class: css } }),
-           bold: Decoration.mark({ attributes: { class: css + '-bold' } }) }
-}
-
-clrs = []
-clrs[1] = clr('cm-ansi-text')
-clrs[32] = clr('cm-ansi-green')
-clrs[36] = clr('cm-ansi-cyan')
-//d({clrs})
+let hide, csRe
 
 hide = Decoration.replace({})
 // https://en.wikipedia.org/wiki/ANSI_escape_code#SGR
