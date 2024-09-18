@@ -1,3 +1,5 @@
+let d = console.log
+
 //!baseTheme
 
 import {EditorView} from "@codemirror/view"
@@ -76,7 +78,8 @@ function stripeDeco(view) {
         }
       }
 
-      if (1) {
+      if (0) {
+        // just hide
         csRe.lastIndex = 0
         ;[...line.text.matchAll(csRe)].forEach(match => {
           console.log({match})
@@ -84,6 +87,47 @@ function stripeDeco(view) {
                       line.from + match.indices[0][1],
                       hide)
         })
+      }
+
+      if (1) {
+        let fg, ranges
+
+        function add
+        (from, len /* of marker */, to, num) {
+          if (fg && ranges.length) {
+            let last
+            last = ranges.at(-1)
+            last.to = from
+          }
+          if (num == 39)
+            num = 0
+          if (clrs[num]) {
+            fg = num
+            ranges.push({ from: from + len, to: to, dec: clrs[num] })
+            return
+          }
+          fg = 0
+        }
+
+        ranges = []
+        fg = 0
+        csRe.lastIndex = 0
+        ;[...line.text.matchAll(csRe)].forEach(match => {
+          let start, end, slice, num
+          start = match.indices[0][0]
+          end = match.indices[0][1]
+          slice = line.text.slice(start + 2)
+          num = parseInt(slice)
+          console.log({num})
+          if (0)
+            // hide marker
+            builder.add(line.from + start,
+                        line.from + end,
+                        hide)
+          add(line.from + start, end, line.to, num)
+        })
+        d({ranges})
+        ranges.forEach(r => builder.add(r.from, r.to, r.dec))
       }
 
       if (0)
