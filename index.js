@@ -162,12 +162,14 @@ function decoLine
       }
       return
     }
-    // color
+    // default fg
     if (num == 39) {
       fg = 0
-      boldOff()
+      if (bg || bold)
+        push({ from: from + len, to: to, fg: fg, bg: bg, bold: bold })
       return
     }
+    // color
     if (isClr(num)) {
       if (isBg(num))
         bg = num
