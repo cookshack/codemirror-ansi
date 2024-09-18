@@ -164,8 +164,9 @@ function decoLine
     }
     // color
     if (num == 39) {
-      num = 0
+      fg = 0
       boldOff()
+      return
     }
     if (isClr(num)) {
       if (isBg(num))
@@ -175,7 +176,6 @@ function decoLine
       push({ from: from + len, to: to, fg: fg, bg: bg, bold: bold })
       return
     }
-    fg = 0
   }
 
   function addAttr
