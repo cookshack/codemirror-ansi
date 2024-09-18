@@ -90,11 +90,11 @@ function stripeDeco(view) {
             last = ranges.at(-1)
             last.to = from
           }
-          // hide marker
-          if (0)
-            ranges.push(line.from + start,
-                        line.from + end,
-                        hide)
+          // hide control sequence
+          if (1)
+            ranges.push({ from: from,
+                          to: from + len,
+                          dec: hide })
           // weight change
           if ([1, 22].includes(num)) {
             if (num == 22) {
@@ -145,7 +145,7 @@ function stripeDeco(view) {
         })
         ranges.forEach(r => builder.add(r.from, r.to, r.dec))
         if (ranges.length) {
-          cache[line.number] = ranges.at(-1)
+          cache[line.number] = ranges.filter(r => r.dec != hide).at(-1)
           //d('cached ' + line.number)
           //d('fg ' + ranges.at(-1).fg)
           //d('bold ' + ranges.at(-1).bold)
