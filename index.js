@@ -64,7 +64,7 @@ let hide, csRe
 
 hide = Decoration.replace({})
 // https://en.wikipedia.org/wiki/ANSI_escape_code#SGR
-csRe = /\x1B\[[0-9]*m/gd
+csRe = /\x1B\[([0-9]*)m/gd
 
 function stripeDeco(view) {
   let step, builder, cache
@@ -135,6 +135,20 @@ function stripeDeco(view) {
           fg = 0
         }
 
+        function addGroup
+        (line, start, end, group) {
+          let slice, num
+          if (group[0] == group[1])
+            // should only happen for first group, via ESC[m;
+            num = 0
+          else {
+            slice = line.text.slice(group[0])
+            num = parseInt(slice)
+          }
+          console.log({num})
+          add(line.from + start, end - start, line.to, num)
+        }
+
         ranges = []
         if (line.number > 0)
           hit = cache[line.number - 1]
@@ -147,13 +161,10 @@ function stripeDeco(view) {
         bold = hit?.bold || 0
         csRe.lastIndex = 0
         ;[...line.text.matchAll(csRe)].forEach(match => {
-          let start, end, slice, num
+          let start, end
           start = match.indices[0][0]
           end = match.indices[0][1]
-          slice = line.text.slice(start + 2)
-          num = parseInt(slice)
-          console.log({num})
-          add(line.from + start, end - start, line.to, num)
+          addGroup(line, start, end, match.indices[1])
         })
         ranges.forEach(r => builder.add(r.from, r.to, r.dec))
         if (ranges.length) {
