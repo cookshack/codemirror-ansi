@@ -8,7 +8,9 @@ const baseTheme = EditorView.baseTheme({
   "&light .cm-ansi": {backgroundColor: "#d4fafa"},
   "&dark .cm-ansi": {backgroundColor: "#1a2727"},
   ".cm-ansi-green": { color: '#00AA00' },
-  ".cm-ansi-cyan": { color: '#00AAAA' }
+  ".cm-ansi-cyan": { color: '#00AAAA' },
+  ".cm-ansi-green-bold": { color: '#00AA00', fontWeight: 'bold' },
+  ".cm-ansi-cyan-bold": { color: '#00AAAA', fontWeight: 'bold' }
 })
 
 //!facet
@@ -45,9 +47,15 @@ const stripeL = Decoration.line({
 
 const stripe = Decoration.mark({ attributes: { class: "cm-ansi" } })
 
+function clr
+(css) {
+  return { norm: Decoration.mark({ attributes: { class: css } }),
+           bold: Decoration.mark({ attributes: { class: css + '-bold' } }) }
+}
+
 clrs = []
-clrs[32] = Decoration.mark({ attributes: { class: "cm-ansi-green" } })
-clrs[36] = Decoration.mark({ attributes: { class: "cm-ansi-cyan" } })
+clrs[32] = clr('cm-ansi-green')
+clrs[36] = clr('cm-ansi-cyan')
 
 hide = Decoration.replace({})
 // https://en.wikipedia.org/wiki/ANSI_escape_code#SGR
@@ -103,7 +111,7 @@ function stripeDeco(view) {
             num = 0
           if (clrs[num]) {
             fg = num
-            ranges.push({ from: from + len, to: to, dec: clrs[num] })
+            ranges.push({ from: from + len, to: to, dec: clrs[num].norm })
             return
           }
           fg = 0
@@ -149,7 +157,7 @@ function stripeDeco(view) {
                 break
               // with a number
               if (clrs[num])
-                builder.add(line.from + i, line.to, clrs[num])
+                builder.add(line.from + i, line.to, clrs[num].norm)
             }
           }
         }
