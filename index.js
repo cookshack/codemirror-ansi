@@ -109,12 +109,13 @@ function decoLine
       return
     }
     // color
-    bold = 0
-    if (num == 39)
+    if (num == 39) {
       num = 0
+      bold = 0
+    }
     if (clrs[num]) {
       fg = num
-      push({ from: from + len, to: to, dec: clrs[num].norm, fg: fg, bold: 0 })
+      push({ from: from + len, to: to, dec: bold ? clrs[num].bold : clrs[num].norm, fg: fg, bold: bold })
       return
     }
     fg = 0
