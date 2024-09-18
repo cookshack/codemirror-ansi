@@ -85,11 +85,11 @@ export function ansi(options = {}) {
   return [
     baseTheme,
     options.step == null ? [] : stepSize.of(options.step),
-    showStripes
+    showAnsi
   ]
 }
 
-//!stripeDeco
+//!ansiDeco
 
 import {Decoration} from "@codemirror/view"
 import {RangeSetBuilder} from "@codemirror/state"
@@ -260,7 +260,7 @@ function decoLine
   }
 }
 
-function stripeDeco(view) {
+function ansiDeco(view) {
   let step, builder, cache
   step = view.state.facet(stepSize)
   builder = new RangeSetBuilder()
@@ -275,18 +275,18 @@ function stripeDeco(view) {
   return builder.finish()
 }
 
-//!showStripes
+//!showAnsi
 
 import {ViewPlugin} from "@codemirror/view"
 
-const showStripes = ViewPlugin.fromClass(class {
+const showAnsi = ViewPlugin.fromClass(class {
   constructor(view) {
-    this.decorations = stripeDeco(view)
+    this.decorations = ansiDeco(view)
   }
 
   update(update) {
     if (update.docChanged || update.viewportChanged)
-      this.decorations = stripeDeco(update.view)
+      this.decorations = ansiDeco(update.view)
   }
 }, {
   decorations: v => v.decorations
