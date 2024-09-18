@@ -71,136 +71,137 @@ hide = Decoration.replace({})
 // ESC[1;32;43m
 csRe = /\x1B\[([0-9]*)((?:;[0-9]+)*)m/gd  // (?: ) is non capturing group
 
+function decoLine
+(builder, cache, line) {
+  // printf '\033[36mcya \033[31mred \033[1mbold-red \033[36mcyan-still-bold\n'
+  // cya red bold-red cyan-still-bold
+
+  if (0) {
+    // just hide
+    csRe.lastIndex = 0
+      ;[...line.text.matchAll(csRe)].forEach(match => {
+      console.log({match})
+      builder.add(line.from + match.indices[0][0],
+                  line.from + match.indices[0][1],
+                  hide)
+    })
+  }
+
+  if (1) {
+    let fg, bold, ranges, hit
+
+    function add
+    (from, len /* of marker */, to, num) {
+      // terminate previous
+      if (fg && ranges.length) {
+        let last
+        last = ranges.at(-1)
+        last.to = from
+      }
+      // hide control sequence
+      if (1)
+        ranges.push({ from: from,
+                     to: from + len,
+                     dec: hide })
+      // weight change
+      if ([1, 22].includes(num)) {
+        if (num == 22) {
+          // normal
+          bold = 0
+          if (fg)
+            ranges.push({ from: from + len, to: to, dec: clrs[fg].norm, fg: fg, bold: 0 })
+        }
+        if (num == 1) {
+          // bold
+          fg = fg || 1
+          bold = 1
+          ranges.push({ from: from + len, to: to, dec: clrs[fg].bold, fg: fg, bold: 1 })
+        }
+        return
+      }
+      // color
+      bold = 0
+      if (num == 39)
+        num = 0
+      if (clrs[num]) {
+        fg = num
+        ranges.push({ from: from + len, to: to, dec: clrs[num].norm, fg: fg, bold: 0 })
+        return
+      }
+      fg = 0
+    }
+
+    function addAttr
+    (line, start, end, slice) {
+      let num
+      num = parseInt(slice)
+      console.log({num})
+      add(line.from + start, end - start, line.to, num)
+    }
+
+    function addGroup
+    (line, start, end, group) {
+      let slice, num
+      if (group[0] == group[1])
+        // should only happen for first group, via ESC[m;
+        num = 0
+      else {
+        slice = line.text.slice(group[0])
+        num = parseInt(slice)
+      }
+      console.log({num})
+      add(line.from + start, end - start, line.to, num)
+    }
+
+    ranges = []
+    if (line.number > 0)
+      hit = cache[line.number - 1]
+    if (hit) {
+      //d('hit ' + line.number)
+      //d('fg ' + hit.fg)
+      //d('bold ' + hit.bold)
+    }
+    fg = hit?.fg || 0
+    bold = hit?.bold || 0
+    csRe.lastIndex = 0
+      ;[...line.text.matchAll(csRe)].forEach(match => {
+      let start, end
+      start = match.indices[0][0]
+      end = match.indices[0][1]
+      addGroup(line, start, end, match.indices[1])
+      if (match.indices.length > 2) {
+        let group2
+        group2 = match.indices[2]
+        if (group2[0] == group2[1])
+          return
+        line.text.slice(group2[0], group2[1]).split(';').forEach(attr => {
+          if (attr.length)
+            addAttr(line, start, end, attr)
+        })
+      }
+    })
+    ranges.forEach(r => builder.add(r.from, r.to, r.dec))
+    if (ranges.length) {
+      cache[line.number] = ranges.filter(r => r.dec != hide).at(-1)
+      //d('cached ' + line.number)
+      //d('fg ' + ranges.at(-1).fg)
+      //d('bold ' + ranges.at(-1).bold)
+    }
+  }
+}
+
 function stripeDeco(view) {
   let step, builder, cache
   step = view.state.facet(stepSize)
   builder = new RangeSetBuilder()
   cache = []
-  for (let {from, to} of view.visibleRanges) {
+  for (let {from, to} of view.visibleRanges)
     for (let pos = from; pos <= to;) {
       let line
-
-      // printf '\033[36mcya \033[31mred \033[1mbold-red \033[36mcyan-still-bold\n'
-      // cya red bold-red cyan-still-bold
-
       line = view.state.doc.lineAt(pos)
-
-      if (0) {
-        // just hide
-        csRe.lastIndex = 0
-        ;[...line.text.matchAll(csRe)].forEach(match => {
-          console.log({match})
-          builder.add(line.from + match.indices[0][0],
-                      line.from + match.indices[0][1],
-                      hide)
-        })
-      }
-
-      if (1) {
-        let fg, bold, ranges, hit
-
-        function add
-        (from, len /* of marker */, to, num) {
-          // terminate previous
-          if (fg && ranges.length) {
-            let last
-            last = ranges.at(-1)
-            last.to = from
-          }
-          // hide control sequence
-          if (1)
-            ranges.push({ from: from,
-                          to: from + len,
-                          dec: hide })
-          // weight change
-          if ([1, 22].includes(num)) {
-            if (num == 22) {
-              // normal
-              bold = 0
-              if (fg)
-                ranges.push({ from: from + len, to: to, dec: clrs[fg].norm, fg: fg, bold: 0 })
-            }
-            if (num == 1) {
-              // bold
-              fg = fg || 1
-              bold = 1
-              ranges.push({ from: from + len, to: to, dec: clrs[fg].bold, fg: fg, bold: 1 })
-            }
-            return
-          }
-          // color
-          bold = 0
-          if (num == 39)
-            num = 0
-          if (clrs[num]) {
-            fg = num
-            ranges.push({ from: from + len, to: to, dec: clrs[num].norm, fg: fg, bold: 0 })
-            return
-          }
-          fg = 0
-        }
-
-        function addAttr
-        (line, start, end, slice) {
-          let num
-          num = parseInt(slice)
-          console.log({num})
-          add(line.from + start, end - start, line.to, num)
-        }
-
-        function addGroup
-        (line, start, end, group) {
-          let slice, num
-          if (group[0] == group[1])
-            // should only happen for first group, via ESC[m;
-            num = 0
-          else {
-            slice = line.text.slice(group[0])
-            num = parseInt(slice)
-          }
-          console.log({num})
-          add(line.from + start, end - start, line.to, num)
-        }
-
-        ranges = []
-        if (line.number > 0)
-          hit = cache[line.number - 1]
-        if (hit) {
-          //d('hit ' + line.number)
-          //d('fg ' + hit.fg)
-          //d('bold ' + hit.bold)
-        }
-        fg = hit?.fg || 0
-        bold = hit?.bold || 0
-        csRe.lastIndex = 0
-        ;[...line.text.matchAll(csRe)].forEach(match => {
-          let start, end
-          start = match.indices[0][0]
-          end = match.indices[0][1]
-          addGroup(line, start, end, match.indices[1])
-          if (match.indices.length > 2) {
-            let group2
-            group2 = match.indices[2]
-            if (group2[0] == group2[1])
-              return
-            line.text.slice(group2[0], group2[1]).split(';').forEach(attr => {
-              if (attr.length)
-                addAttr(line, start, end, attr)
-            })
-          }
-        })
-        ranges.forEach(r => builder.add(r.from, r.to, r.dec))
-        if (ranges.length) {
-          cache[line.number] = ranges.filter(r => r.dec != hide).at(-1)
-          //d('cached ' + line.number)
-          //d('fg ' + ranges.at(-1).fg)
-          //d('bold ' + ranges.at(-1).bold)
-        }
-      }
-
+      decoLine(builder, cache, line)
       pos = line.to + 1
     }
-  }
   return builder.finish()
 }
 
