@@ -6,16 +6,36 @@ d = console.log
 
 import {EditorView} from "@codemirror/view"
 
+function bgClr
+(bg) {
+  let fg
+  fg = bg - 10
+  return clrs[fg]
+}
+
+function isBg
+(num) {
+  return (num >= 40) && (num <= 47)
+}
+
+function isClr
+(num) {
+  return isBg(num) || clrs[num]
+}
+
 function clr
 (name, color) {
   let css
   css = 'cm-ansi-' + name
-  if (color)
+  if (color) {
     style['.' + css] = { color: color }
+    style['.' + css + '-bg'] = { backgroundColor: color }
+  }
   else
-    // special case for plain bold (num 1)
+    // special case for plain bold (attr 1)
     style['.' + css] = {}
   return { norm: Decoration.mark({ attributes: { class: css } }),
+           bg: Decoration.mark({ attributes: { class: css + '-bg' } }),
            bold: Decoration.mark({ attributes: { class: css + ' cm-ansi-bold' } }) }
 }
 
@@ -69,7 +89,7 @@ csRe = /\x1B\[([0-9]*)((?:;[0-9]+)*)m/gd  // (?: ) is non capturing group
 
 function decoLine
 (builder, cache, line) {
-  let fg, bold, ranges, hit, matches
+  let fg, bg, bold, ranges, hit, matches
 
   function boldOn
   () {
@@ -89,32 +109,35 @@ function decoLine
     if (attr.from == undefined)
       // pushing for the line cache, eg for reset
       attr.skipStyle = 1
-    else if (attr.fg == undefined) {
-      // this "attribute" hides the control sequence
+    else if (attr.hide) {
+      // this "attribute" hides the control sequences
       attr.dec = hide
       // cache is for attributes that affect the style
       attr.skipCache = 1
     }
-    else
+    else if (attr.fg)
       attr.dec = attr.bold ? clrs[attr.fg].bold : clrs[attr.fg].norm
+    else if (attr.bg)
+      attr.dec = bgClr(attr.bg).bg
     ranges.push(attr)
   }
 
   function add
   (from, len /* of marker */, to, num) {
     // terminate previous
-    if (fg && ranges.length) {
+    if ((fg || bg) && ranges.length) {
       let last
       last = ranges.at(-1)
       last.to = from
     }
     // hide control sequence
     if (1)
-      push({ from: from, to: from + len })
+      push({ from: from, to: from + len, hide: 1 })
     // reset
     if (num == 0) {
       fg = 0
-      push({ bold: 0, fg: fg }) // dummy, for cache
+      bg = 0
+      push({ bold: 0, fg: fg, bg: bg }) // dummy, for cache
       boldOff()
       return
     }
@@ -123,14 +146,14 @@ function decoLine
       if (num == 22) {
         // normal
         boldOff()
-        if (fg)
-          push({ from: from + len, to: to, fg: fg, bold: 0 })
+        if (fg || bg)
+          push({ from: from + len, to: to, fg: fg, bg: bg, bold: 0 })
       }
       if (num == 1) {
         // bold
         fg = fg || 1
         boldOn()
-        push({ from: from + len, to: to, fg: fg, bold: 1 })
+        push({ from: from + len, to: to, fg: fg, bg: bg, bold: 1 })
       }
       return
     }
@@ -139,9 +162,12 @@ function decoLine
       num = 0
       boldOff()
     }
-    if (clrs[num]) {
-      fg = num
-      push({ from: from + len, to: to, fg: fg, bold: bold })
+    if (isClr(num)) {
+      if (isBg(num))
+        bg = num
+      else
+        fg = num
+      push({ from: from + len, to: to, fg: fg, bg: bg, bold: bold })
       return
     }
     fg = 0
@@ -175,9 +201,11 @@ function decoLine
   if (hit) {
     d('hit ' + line.number)
     d('fg ' + hit.fg)
+    d('bg ' + hit.bg)
     d('bold ' + hit.bold)
   }
   fg = hit?.fg || 0
+  bg = hit?.bg || 0
   bold = hit?.bold || 0
   csRe.lastIndex = 0
   matches = line.text.matchAll(csRe)
@@ -204,6 +232,7 @@ function decoLine
     cache[line.number] = ranges.filter(r => r.skipCache).at(-1)
     d('cached ' + line.number)
     d('fg ' + cache[line.number].fg)
+    d('bg ' + cache[line.number].bg)
     d('bold ' + cache[line.number].bold)
   }
 }
