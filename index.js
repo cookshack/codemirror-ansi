@@ -24,6 +24,19 @@ function isClr
   return isBg(num) || clrs[num]
 }
 
+function makeDec
+(attr) {
+  let css
+  css = ''
+  if (attr.fg)
+    css += ' cm-ansi-' + clrs[attr.fg].name
+  if (attr.bg)
+    css += ' cm-ansi-' + clrs[attr.bg - 10].name + '-bg'
+  if (attr.bold)
+    css += ' cm-ansi-bold'
+  return Decoration.mark({ attributes: { class: css } })
+}
+
 function clr
 (name, color) {
   let css
@@ -37,7 +50,8 @@ function clr
     style['.' + css] = {}
     style['.' + css + '-bg'] = {}
   }
-  return { norm: Decoration.mark({ attributes: { class: css } }),
+  return { name: name,
+           norm: Decoration.mark({ attributes: { class: css } }),
            bg: Decoration.mark({ attributes: { class: css + '-bg' } }),
            bold: Decoration.mark({ attributes: { class: css + ' cm-ansi-bold' } }),
            boldBg: Decoration.mark({ attributes: { class: css + '-bg cm-ansi-bold' } }) }
@@ -119,6 +133,8 @@ function decoLine
       // cache is for attributes that affect the style
       attr.skipCache = 1
     }
+    else if (attr.bg && attr.fg)
+      attr.dec = makeDec(attr)
     else if (attr.bg)
       attr.dec = bgDec(attr.bg, attr.bold)
     else if (attr.fg)
