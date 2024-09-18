@@ -75,6 +75,18 @@ function decoLine
 (builder, cache, line) {
   let fg, bold, ranges, hit, matches
 
+  function boldOn
+  () {
+    d('bold on')
+    bold = 1
+  }
+
+  function boldOff
+  () {
+    d('bold off')
+    bold = 0
+  }
+
   function push
   (attr) {
     d({attr})
@@ -96,18 +108,24 @@ function decoLine
     // hide control sequence
     if (1)
       push({ from: from, to: from + len })
+    // reset
+    if (num == 0) {
+      fg = 0
+      boldOff()
+      return
+    }
     // weight change
     if ([1, 22].includes(num)) {
       if (num == 22) {
         // normal
-        bold = 0
+        boldOff()
         if (fg)
           push({ from: from + len, to: to, fg: fg, bold: 0 })
       }
       if (num == 1) {
         // bold
         fg = fg || 1
-        bold = 1
+        boldOn()
         push({ from: from + len, to: to, fg: fg, bold: 1 })
       }
       return
@@ -115,7 +133,7 @@ function decoLine
     // color
     if (num == 39) {
       num = 0
-      bold = 0
+      boldOff()
     }
     if (clrs[num]) {
       fg = num
