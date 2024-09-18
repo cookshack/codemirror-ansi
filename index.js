@@ -75,6 +75,12 @@ function decoLine
 (builder, cache, line) {
   let fg, bold, ranges, hit, matches
 
+  function push
+  (attr) {
+    d({attr})
+    ranges.push(attr)
+  }
+
   function add
   (from, len /* of marker */, to, num) {
     // terminate previous
@@ -85,22 +91,20 @@ function decoLine
     }
     // hide control sequence
     if (1)
-      ranges.push({ from: from,
-                   to: from + len,
-                   dec: hide })
+      push({ from: from, to: from + len, dec: hide })
     // weight change
     if ([1, 22].includes(num)) {
       if (num == 22) {
         // normal
         bold = 0
         if (fg)
-          ranges.push({ from: from + len, to: to, dec: clrs[fg].norm, fg: fg, bold: 0 })
+          push({ from: from + len, to: to, dec: clrs[fg].norm, fg: fg, bold: 0 })
       }
       if (num == 1) {
         // bold
         fg = fg || 1
         bold = 1
-        ranges.push({ from: from + len, to: to, dec: clrs[fg].bold, fg: fg, bold: 1 })
+        push({ from: from + len, to: to, dec: clrs[fg].bold, fg: fg, bold: 1 })
       }
       return
     }
@@ -110,7 +114,7 @@ function decoLine
       num = 0
     if (clrs[num]) {
       fg = num
-      ranges.push({ from: from + len, to: to, dec: clrs[num].norm, fg: fg, bold: 0 })
+      push({ from: from + len, to: to, dec: clrs[num].norm, fg: fg, bold: 0 })
       return
     }
     fg = 0
@@ -154,7 +158,9 @@ function decoLine
     let start, end
     start = match.indices[0][0]
     end = match.indices[0][1]
+    // First attribute has own group
     addGroup(line, start, end, match.indices[1])
+    // Remaining attributes need to be split
     if (match.indices.length > 2) {
       let group2
       group2 = match.indices[2]
