@@ -94,27 +94,36 @@ function stripeDeco(view) {
       }
 
       if (1) {
-        let fg, ranges
+        let fg, bold, ranges
 
         function add
         (from, len /* of marker */, to, num) {
+          // terminate previous
           if (fg && ranges.length) {
             let last
             last = ranges.at(-1)
             last.to = from
           }
+          // weight change
+          if ([1, 22].includes(num)) {
+            if (num == 22) {
+              // normal
+              if (fg)
+                ranges.push({ from: from + len, to: to, dec: clrs[fg].norm })
+              bold = 0
+            }
+            if (num == 1) {
+              // bold
+              fg = fg || 1
+              bold = 1
+              ranges.push({ from: from + len, to: to, dec: clrs[fg].bold })
+            }
+            return
+          }
+          // color
+          bold = 0
           if (num == 39)
             num = 0
-          if (num == 22) {
-            // normal weight
-            return
-          }
-          if (num == 1) {
-            // bold weight
-            fg = 1
-            ranges.push({ from: from + len, to: to, dec: clrs[1].bold })
-            return
-          }
           if (clrs[num]) {
             fg = num
             ranges.push({ from: from + len, to: to, dec: clrs[num].norm })
@@ -125,6 +134,7 @@ function stripeDeco(view) {
 
         ranges = []
         fg = 0
+        bold = 0
         csRe.lastIndex = 0
         ;[...line.text.matchAll(csRe)].forEach(match => {
           let start, end, slice, num
