@@ -123,13 +123,15 @@ function decoLine
       attr.dec = bgDec(attr.bg, attr.bold)
     else if (attr.fg)
       attr.dec = attr.bold ? clrs[attr.fg].bold : clrs[attr.fg].norm
+    else if (attr.bold)
+      attr.dec = clrs[1].bold
     ranges.push(attr)
   }
 
   function add
   (from, len /* of marker */, to, num) {
     // terminate previous
-    if ((fg || bg) && ranges.length) {
+    if ((fg || bg || bold) && ranges.length) {
       let last
       last = ranges.at(-1)
       last.to = from
@@ -155,7 +157,6 @@ function decoLine
       }
       if (num == 1) {
         // bold
-        fg = fg || 1
         boldOn()
         push({ from: from + len, to: to, fg: fg, bg: bg, bold: 1 })
       }
