@@ -55,8 +55,10 @@ hide = Decoration.replace({})
 csRe = /\x1B\[[0-9]*m/gd
 
 function stripeDeco(view) {
-  let step = view.state.facet(stepSize)
-  let builder = new RangeSetBuilder()
+  let step, builder, cache
+  step = view.state.facet(stepSize)
+  builder = new RangeSetBuilder()
+  cache = []
   for (let {from, to} of view.visibleRanges) {
     for (let pos = from; pos <= to;) {
       let line
@@ -78,7 +80,7 @@ function stripeDeco(view) {
       }
 
       if (1) {
-        let fg, bold, ranges
+        let fg, bold, ranges, hit
 
         function add
         (from, len /* of marker */, to, num) {
@@ -92,15 +94,15 @@ function stripeDeco(view) {
           if ([1, 22].includes(num)) {
             if (num == 22) {
               // normal
-              if (fg)
-                ranges.push({ from: from + len, to: to, dec: clrs[fg].norm })
               bold = 0
+              if (fg)
+                ranges.push({ from: from + len, to: to, dec: clrs[fg].norm, fg: fg, bold: 0 })
             }
             if (num == 1) {
               // bold
               fg = fg || 1
               bold = 1
-              ranges.push({ from: from + len, to: to, dec: clrs[fg].bold })
+              ranges.push({ from: from + len, to: to, dec: clrs[fg].bold, fg: fg, bold: 1 })
             }
             return
           }
@@ -110,15 +112,22 @@ function stripeDeco(view) {
             num = 0
           if (clrs[num]) {
             fg = num
-            ranges.push({ from: from + len, to: to, dec: clrs[num].norm })
+            ranges.push({ from: from + len, to: to, dec: clrs[num].norm, fg: fg, bold: 0 })
             return
           }
           fg = 0
         }
 
         ranges = []
-        fg = 0
-        bold = 0
+        if (line.number > 0)
+          hit = cache[line.number - 1]
+        if (hit) {
+          //d('hit ' + line.number)
+          //d('fg ' + hit.fg)
+          //d('bold ' + hit.bold)
+        }
+        fg = hit?.fg || 0
+        bold = hit?.bold || 0
         csRe.lastIndex = 0
         ;[...line.text.matchAll(csRe)].forEach(match => {
           let start, end, slice, num
@@ -134,8 +143,13 @@ function stripeDeco(view) {
                         hide)
           add(line.from + start, end - start, line.to, num)
         })
-        d({ranges})
         ranges.forEach(r => builder.add(r.from, r.to, r.dec))
+        if (ranges.length) {
+          cache[line.number] = ranges.at(-1)
+          //d('cached ' + line.number)
+          //d('fg ' + ranges.at(-1).fg)
+          //d('bold ' + ranges.at(-1).bold)
+        }
       }
 
       pos = line.to + 1
