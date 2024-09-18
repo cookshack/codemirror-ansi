@@ -16,8 +16,8 @@ function clr
   }
   else {
     // special case for plain bold (num 1)
-    style[css] = {}
-    style[css + '-bold'] = { fontWeight: 'bold' }
+    style['.' + css] = {}
+    style['.' + css + '-bold'] = { fontWeight: 'bold' }
   }
   return { norm: Decoration.mark({ attributes: { class: css } }),
            bold: Decoration.mark({ attributes: { class: css + '-bold' } }) }
