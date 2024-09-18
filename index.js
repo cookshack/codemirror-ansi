@@ -6,11 +6,12 @@ d = console.log
 
 import {EditorView} from "@codemirror/view"
 
-function bgClr
-(bg) {
-  let fg
+function bgDec
+(bg, bold) {
+  let fg, c
   fg = bg - 10
-  return clrs[fg]
+  c = clrs[fg]
+  return bold ? c.boldBg : c.bg
 }
 
 function isBg
@@ -31,12 +32,15 @@ function clr
     style['.' + css] = { color: color }
     style['.' + css + '-bg'] = { backgroundColor: color }
   }
-  else
-    // special case for plain bold (attr 1)
+  else {
+    // special case for regular fg with bold (eg ESC[1m or ESC[1;40m)
     style['.' + css] = {}
+    style['.' + css + '-bg'] = {}
+  }
   return { norm: Decoration.mark({ attributes: { class: css } }),
            bg: Decoration.mark({ attributes: { class: css + '-bg' } }),
-           bold: Decoration.mark({ attributes: { class: css + ' cm-ansi-bold' } }) }
+           bold: Decoration.mark({ attributes: { class: css + ' cm-ansi-bold' } }),
+           boldBg: Decoration.mark({ attributes: { class: css + '-bg cm-ansi-bold' } }) }
 }
 
 style = { '.cm-ansi-bold': { fontWeight: 'bold' } }
@@ -115,10 +119,10 @@ function decoLine
       // cache is for attributes that affect the style
       attr.skipCache = 1
     }
+    else if (attr.bg)
+      attr.dec = bgDec(attr.bg, attr.bold)
     else if (attr.fg)
       attr.dec = attr.bold ? clrs[attr.fg].bold : clrs[attr.fg].norm
-    else if (attr.bg)
-      attr.dec = bgClr(attr.bg).bg
     ranges.push(attr)
   }
 
