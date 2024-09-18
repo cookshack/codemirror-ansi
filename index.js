@@ -36,10 +36,7 @@ export function ansi(options = {}) {
 import {Decoration} from "@codemirror/view"
 import {RangeSetBuilder} from "@codemirror/state"
 
-let CSI, clrs, hide, csRe
-
-// control sequence introducer
-CSI = "\x1B["
+let clrs, hide, csRe
 
 function clr
 (css) {
@@ -51,11 +48,10 @@ clrs = []
 clrs[1] = clr('cm-ansi-text')
 clrs[32] = clr('cm-ansi-green')
 clrs[36] = clr('cm-ansi-cyan')
-d({clrs})
+//d({clrs})
 
 hide = Decoration.replace({})
 // https://en.wikipedia.org/wiki/ANSI_escape_code#SGR
-//csRe = /\x1B\[32m/g
 csRe = /\x1B\[[0-9]*m/gd
 
 function stripeDeco(view) {
@@ -69,18 +65,6 @@ function stripeDeco(view) {
       // cya red bold-red cyan-still-bold
 
       line = view.state.doc.lineAt(pos)
-
-      if (0) {
-        let match
-
-        csRe.lastIndex = 0
-        match = csRe.exec(line.text)
-        if (match) {
-          console.log({match})
-          //builder.add(line.from + match.index, line.from + csRe.lastIndex, hide)
-          builder.add(line.from + match.indices[0][0], line.from + match.indices[0][1], hide)
-        }
-      }
 
       if (0) {
         // just hide
@@ -154,29 +138,6 @@ function stripeDeco(view) {
         ranges.forEach(r => builder.add(r.from, r.to, r.dec))
       }
 
-      if (0)
-        for (let i = 0; i < line.text.length; i++) {
-          if (line.text.charCodeAt(i) == 27) { // ESC (\x1B)
-            i++
-            if (i >= line.text.length)
-              break
-            if (line.text.charCodeAt(i) == 91) { // [
-              let num
-
-              i++
-              if (i >= line.text.length)
-                break
-
-              // control sequence
-              num = parseInt(line.text.slice(i))
-              if (isNaN(num))
-                break
-              // with a number
-              if (clrs[num])
-                builder.add(line.from + i, line.to, clrs[num].norm)
-            }
-          }
-        }
       pos = line.to + 1
     }
   }
