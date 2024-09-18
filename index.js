@@ -26,8 +26,14 @@ function clr
 style = {}
 clrs = []
 clrs[1] = clr('text', null)
+clrs[30] = clr('black', '#000000')
+clrs[31] = clr('red', '#AA0000')
 clrs[32] = clr('green', '#00AA00')
+clrs[33] = clr('yellow', '#AA5500')
+clrs[34] = clr('blue', '#0000AA')
+clrs[35] = clr('magenta', '#AA00AA')
 clrs[36] = clr('cyan', '#00AAAA')
+clrs[37] = clr('white', '#AAAAAA')
 
 const baseTheme = EditorView.baseTheme(style)
 
