@@ -78,6 +78,10 @@ function decoLine
   function push
   (attr) {
     d({attr})
+    if (attr.fg == undefined)
+      attr.dec = hide
+    else
+      attr.dec = attr.bold ? clrs[attr.fg].bold : clrs[attr.fg].norm
     ranges.push(attr)
   }
 
@@ -91,20 +95,20 @@ function decoLine
     }
     // hide control sequence
     if (1)
-      push({ from: from, to: from + len, dec: hide })
+      push({ from: from, to: from + len })
     // weight change
     if ([1, 22].includes(num)) {
       if (num == 22) {
         // normal
         bold = 0
         if (fg)
-          push({ from: from + len, to: to, dec: clrs[fg].norm, fg: fg, bold: 0 })
+          push({ from: from + len, to: to, fg: fg, bold: 0 })
       }
       if (num == 1) {
         // bold
         fg = fg || 1
         bold = 1
-        push({ from: from + len, to: to, dec: clrs[fg].bold, fg: fg, bold: 1 })
+        push({ from: from + len, to: to, fg: fg, bold: 1 })
       }
       return
     }
@@ -115,7 +119,7 @@ function decoLine
     }
     if (clrs[num]) {
       fg = num
-      push({ from: from + len, to: to, dec: bold ? clrs[num].bold : clrs[num].norm, fg: fg, bold: bold })
+      push({ from: from + len, to: to, fg: fg, bold: bold })
       return
     }
     fg = 0
