@@ -90,6 +90,11 @@ function stripeDeco(view) {
             last = ranges.at(-1)
             last.to = from
           }
+          // hide marker
+          if (0)
+            ranges.push(line.from + start,
+                        line.from + end,
+                        hide)
           // weight change
           if ([1, 22].includes(num)) {
             if (num == 22) {
@@ -136,11 +141,6 @@ function stripeDeco(view) {
           slice = line.text.slice(start + 2)
           num = parseInt(slice)
           console.log({num})
-          if (0)
-            // hide marker
-            builder.add(line.from + start,
-                        line.from + end,
-                        hide)
           add(line.from + start, end - start, line.to, num)
         })
         ranges.forEach(r => builder.add(r.from, r.to, r.dec))
