@@ -2,7 +2,9 @@
 
 ANSI escape code handling for [CodeMirror 6](https://codemirror.net/).
 
-Currently just hides Select Graphic Rendition sequences (the color escapes).
+Currently only affects Select Graphic Rendition sequences (the color escapes):
+1. hides control chars
+2. displays/clears 4 bit fg/bg colors and bold
 
 ## Build from source
 
