@@ -6,6 +6,19 @@ Currently only affects Select Graphic Rendition sequences (the color escapes):
 1. hides control chars
 2. displays/clears 4 bit fg/bg colors and bold
 
+## Screenshots
+
+![All colors](shot/all.png)
+
+![npm run prepare](shot/prepare.png)
+
+## Example
+
+```javascript
+window.view = new EditorView({
+  extensions: [ ansi(), ...
+```
+
 ## Build from source
 
 ```
