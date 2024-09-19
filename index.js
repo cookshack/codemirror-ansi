@@ -267,13 +267,17 @@ function decoLine
     }
   })
   ranges.forEach(r => r.skipStyle || builder.add(r.from, r.to, r.dec))
-  if (ranges.length) {
-    cache[line.number] = ranges.filter(r => r.cache).at(-1)
-    if (1) {
-      d('cached ' + line.number)
-      d('fg ' + cache[line.number].fg)
-      d('bg ' + cache[line.number].bg)
-      d('bold ' + cache[line.number].bold)
+  {
+    let filtered
+    filtered = ranges.filter(r => r.cache)
+    if (filtered.length) {
+      cache[line.number] = filtered.at(-1)
+      if (1) {
+        d('cached ' + line.number)
+        d('fg ' + cache[line.number].fg)
+        d('bg ' + cache[line.number].bg)
+        d('bold ' + cache[line.number].bold)
+      }
     }
   }
 }
