@@ -113,19 +113,16 @@ function decoLine
 
   function boldOn
   () {
-    d('bold on')
     bold = 1
   }
 
   function boldOff
   () {
-    d('bold off')
     bold = 0
   }
 
   function push
   (attr) {
-    d({ attr })
     if (attr.from == undefined)
       // pushing for the line cache, eg for reset
       attr.skipStyle = 1
@@ -204,7 +201,6 @@ function decoLine
     let num
 
     num = parseInt(slice)
-    console.log({num})
     add(line.from + start, end - start, line.to, num)
   }
 
@@ -219,7 +215,6 @@ function decoLine
       slice = line.text.slice(group[0])
       num = parseInt(slice)
     }
-    console.log({ num })
     add(line.from + start, end - start, line.to, num)
   }
 
@@ -227,10 +222,10 @@ function decoLine
   if (line.number > 0)
     hit = cache[line.number - 1]
   if (hit) {
-    d('hit ' + line.number)
-    d('fg ' + hit.fg)
-    d('bg ' + hit.bg)
-    d('bold ' + hit.bold)
+    //d('hit ' + line.number)
+    //d('fg ' + hit.fg)
+    //d('bg ' + hit.bg)
+    //d('bold ' + hit.bold)
   }
   fg = hit?.fg || 0
   bg = hit?.bg || 0
@@ -260,10 +255,10 @@ function decoLine
   ranges.forEach(r => r.skipStyle || builder.add(r.from, r.to, r.dec))
   if (ranges.length) {
     cache[line.number] = ranges.filter(r => r.skipCache).at(-1)
-    d('cached ' + line.number)
-    d('fg ' + cache[line.number].fg)
-    d('bg ' + cache[line.number].bg)
-    d('bold ' + cache[line.number].bold)
+    0 && d('cached ' + line.number)
+    //d('fg ' + cache[line.number].fg)
+    //d('bg ' + cache[line.number].bg)
+    //d('bold ' + cache[line.number].bold)
   }
 }
 
