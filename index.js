@@ -185,6 +185,13 @@ function decoLine
         push({ from: from + len, to: to, fg: fg, bg: bg, bold: bold })
       return
     }
+    // default bg
+    if (num == 49) {
+      bg = 0
+      if (fg || bold)
+        push({ from: from + len, to: to, fg: fg, bg: bg, bold: bold })
+      return
+    }
     // color
     if (isClr(num)) {
       if (isBg(num))
