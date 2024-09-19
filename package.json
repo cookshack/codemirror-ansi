@@ -1,7 +1,7 @@
 {
   "name": "@cookshack/codemirror-ansi",
   "version": "0.1.0",
-  "description": "ASNI escape code extension for Codemirror 6",
+  "description": "ANSI escape code extension for Codemirror 6",
   "homepage": "https://git.sr.ht/~mattmundell/codemirror-ansi",
   "scripts": {
     "prepare": "rollup -c"
