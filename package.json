@@ -25,5 +25,10 @@
   "dependencies": {
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.33.0"
-  }
+  },
+  "files": [
+    "all-colors",
+    "index.js",
+    "rollup.config.js"
+  ]
 }
