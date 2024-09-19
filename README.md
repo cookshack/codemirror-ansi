@@ -8,9 +8,9 @@ Currently only affects Select Graphic Rendition sequences (the color escapes):
 
 ## Screenshots
 
-![All colors](shot/all.png)
+![All colors](https://git.sr.ht/~mattmundell/codemirror-ansi/blob/main/shot/all.png)
 
-![npm run prepare](shot/prepare.png)
+![npm run prepare](https://git.sr.ht/~mattmundell/codemirror-ansi/blob/main/shot/prepare.png)
 
 ## Example
 
