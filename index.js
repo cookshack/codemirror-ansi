@@ -60,17 +60,23 @@ function clr
            boldBg: Decoration.mark({ attributes: { class: css + '-bg cm-ansi-bold' } }) }
 }
 
+function clr2
+(i, name, color, bright) {
+  clrs[i] = clr(name, color)
+  clrs[i + 60] = clr('bright' + name, bright)
+}
+
 style = { '.cm-ansi-bold': { fontWeight: 'bold' } }
 clrs = []
 clrs[1] = clr('text', null)
-clrs[30] = clr('black', '#000000')
-clrs[31] = clr('red', '#AA0000')
-clrs[32] = clr('green', '#00AA00')
-clrs[33] = clr('yellow', '#AA5500')
-clrs[34] = clr('blue', '#0000AA')
-clrs[35] = clr('magenta', '#AA00AA')
-clrs[36] = clr('cyan', '#00AAAA')
-clrs[37] = clr('white', '#AAAAAA')
+clr2(30, 'black', '#000000', '#555555')
+clr2(31, 'red', '#AA0000', '#FF5555')
+clr2(32, 'green', '#00AA00', '#55FF55')
+clr2(33, 'yellow', '#AA5500', '#FFFF55')
+clr2(34, 'blue', '#0000AA', '#5555FF')
+clr2(35, 'magenta', '#AA00AA', '#FF55FF')
+clr2(36, 'cyan', '#00AAAA', '#55FFFF')
+clr2(37, 'white', '#AAAAAA', '#FFFFFF')
 
 const baseTheme = EditorView.baseTheme(style)
 
