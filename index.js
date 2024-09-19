@@ -151,9 +151,13 @@ function decoLine
   }
 
   function add
-  (from, len /* of marker */, to, num) {
+  (from, len /* of marker */, to, num, init) {
+    d('add ' + from + ' ' + len + ' ' + to + ' ' + num + ' ' + init)
     // terminate previous
-    if ((fg || bg || bold) && ranges.length) {
+    if (init) {
+      // skip because initializing line with cached info from previous line
+    }
+    else if ((fg || bg || bold) && ranges.length) {
       let last
 
       last = ranges.at(-1)
@@ -211,11 +215,15 @@ function decoLine
   }
 
   function addAttr
-  (line, start, end, slice) {
+  (line,
+   start, // of control sequence, offset into line
+   end, // of control sequence, offset into line
+   slice,
+   init) {
     let num
 
     num = parseInt(slice)
-    add(line.from + start, end - start, line.to, num)
+    add(line.from + start, end - start, line.to, num, init)
   }
 
   function addGroup
@@ -235,15 +243,26 @@ function decoLine
   ranges = []
   if (line.number > 0)
     hit = cache[line.number - 1]
-  if (1 && hit) {
-    d('hit ' + line.number)
-    d('fg ' + hit.fg)
-    d('bg ' + hit.bg)
-    d('bold ' + hit.bold)
-  }
   fg = hit?.fg || 0
   bg = hit?.bg || 0
   bold = hit?.bold || 0
+  if (hit) {
+    if (1) {
+      d('hit ' + line.number)
+      d('fg ' + hit.fg)
+      d('bg ' + hit.bg)
+      d('bold ' + hit.bold)
+    }
+    // Only one because they're in the same position.
+    // Will pick up other values from fg/bg/bold vars in add.
+    // Last arg 1 to prevent closing previous attr, because we're starting a new line.
+    if (hit.fg)
+      addAttr(line, 0, 0, hit.fg, 1)
+    else if (hit.bg)
+      addAttr(line, 0, 0, hit.bg, 1)
+    else if (hit.bold)
+      addAttr(line, 0, 0, 1, 1)
+  }
   csRe.lastIndex = 0
   matches = line.text.matchAll(csRe)
   matches.forEach(match => {
@@ -269,6 +288,7 @@ function decoLine
   ranges.forEach(r => r.skipStyle || builder.add(r.from, r.to, r.dec))
   {
     let filtered
+
     filtered = ranges.filter(r => r.cache)
     if (filtered.length) {
       cache[line.number] = filtered.at(-1)
