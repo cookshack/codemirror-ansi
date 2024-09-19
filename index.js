@@ -129,6 +129,7 @@ function decoLine
 
   function push
   (attr) {
+    attr.cache = 1
     if (attr.from == undefined)
       // pushing for the line cache, eg for reset
       attr.skipStyle = 1
@@ -136,7 +137,7 @@ function decoLine
       // this 'attribute' hides the control sequences
       attr.dec = hide
       // cache is for attributes that affect the style
-      attr.skipCache = 1
+      attr.cache = 0
     }
     else if (attr.bg && attr.fg)
       attr.dec = makeDec(attr)
@@ -234,11 +235,11 @@ function decoLine
   ranges = []
   if (line.number > 0)
     hit = cache[line.number - 1]
-  if (hit) {
-    //d('hit ' + line.number)
-    //d('fg ' + hit.fg)
-    //d('bg ' + hit.bg)
-    //d('bold ' + hit.bold)
+  if (1 && hit) {
+    d('hit ' + line.number)
+    d('fg ' + hit.fg)
+    d('bg ' + hit.bg)
+    d('bold ' + hit.bold)
   }
   fg = hit?.fg || 0
   bg = hit?.bg || 0
@@ -267,11 +268,13 @@ function decoLine
   })
   ranges.forEach(r => r.skipStyle || builder.add(r.from, r.to, r.dec))
   if (ranges.length) {
-    cache[line.number] = ranges.filter(r => r.skipCache).at(-1)
-    0 && d('cached ' + line.number)
-    //d('fg ' + cache[line.number].fg)
-    //d('bg ' + cache[line.number].bg)
-    //d('bold ' + cache[line.number].bold)
+    cache[line.number] = ranges.filter(r => r.cache).at(-1)
+    if (1) {
+      d('cached ' + line.number)
+      d('fg ' + cache[line.number].fg)
+      d('bg ' + cache[line.number].bg)
+      d('bold ' + cache[line.number].bold)
+    }
   }
 }
 
