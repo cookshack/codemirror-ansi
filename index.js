@@ -181,6 +181,8 @@ function decoLine
         boldOff()
         if (fg || bg)
           push({ from: from + len, to: to, fg: fg, bg: bg, bold: 0 })
+        else
+          push({ bold: 0, fg: 0, bg: 0 }) // dummy, for cache
       }
       if (num == 1) {
         // bold
