@@ -4,11 +4,12 @@ d = console.log
 
 //!baseTheme
 
-import {EditorView} from "@codemirror/view"
+import { EditorView } from '@codemirror/view'
 
 function bgDec
 (bg, bold) {
   let fg, c
+
   fg = bg - 10
   c = clrs[fg]
   return bold ? c.boldBg : c.bg
@@ -27,6 +28,7 @@ function isClr
 function makeDec
 (attr) {
   let css
+
   css = ''
   if (attr.fg)
     css += ' cm-ansi-' + clrs[attr.fg].name
@@ -40,6 +42,7 @@ function makeDec
 function clr
 (name, color) {
   let css
+
   css = 'cm-ansi-' + name
   if (color) {
     style['.' + css] = { color: color }
@@ -73,7 +76,7 @@ const baseTheme = EditorView.baseTheme(style)
 
 //!facet
 
-import {Facet} from "@codemirror/state"
+import { Facet } from '@codemirror/state'
 
 const stepSize = Facet.define({
   combine: values => values.length ? Math.min(...values) : 2
@@ -81,18 +84,17 @@ const stepSize = Facet.define({
 
 //!constructor
 
-export function ansi(options = {}) {
-  return [
-    baseTheme,
-    options.step == null ? [] : stepSize.of(options.step),
-    showAnsi
-  ]
+export function ansi
+(options = {}) {
+  return [ baseTheme,
+           options.step == null ? [] : stepSize.of(options.step),
+           showAnsi ]
 }
 
 //!ansiDeco
 
-import {Decoration} from "@codemirror/view"
-import {RangeSetBuilder} from "@codemirror/state"
+import { Decoration } from '@codemirror/view'
+import { RangeSetBuilder } from '@codemirror/state'
 
 let hide, csRe
 
@@ -103,7 +105,7 @@ hide = Decoration.replace({})
 // ESC[1m
 // ESC[1;32m
 // ESC[1;32;43m
-csRe = /\x1B\[([0-9]*)((?:;[0-9]+)*)m/gd  // (?: ) is non capturing group
+csRe = /\x1B\[([0-9]*)((?:;[0-9]+)*)m/gd // (?: ) is non capturing group
 
 function decoLine
 (builder, cache, line) {
@@ -123,12 +125,12 @@ function decoLine
 
   function push
   (attr) {
-    d({attr})
+    d({ attr })
     if (attr.from == undefined)
       // pushing for the line cache, eg for reset
       attr.skipStyle = 1
     else if (attr.hide) {
-      // this "attribute" hides the control sequences
+      // this 'attribute' hides the control sequences
       attr.dec = hide
       // cache is for attributes that affect the style
       attr.skipCache = 1
@@ -149,6 +151,7 @@ function decoLine
     // terminate previous
     if ((fg || bg || bold) && ranges.length) {
       let last
+
       last = ranges.at(-1)
       last.to = from
     }
@@ -199,6 +202,7 @@ function decoLine
   function addAttr
   (line, start, end, slice) {
     let num
+
     num = parseInt(slice)
     console.log({num})
     add(line.from + start, end - start, line.to, num)
@@ -207,6 +211,7 @@ function decoLine
   function addGroup
   (line, start, end, group) {
     let slice, num
+
     if (group[0] == group[1])
       // should only happen for first group, via ESC[m;
       num = 0
@@ -214,7 +219,7 @@ function decoLine
       slice = line.text.slice(group[0])
       num = parseInt(slice)
     }
-    console.log({num})
+    console.log({ num })
     add(line.from + start, end - start, line.to, num)
   }
 
@@ -234,6 +239,7 @@ function decoLine
   matches = line.text.matchAll(csRe)
   matches.forEach(match => {
     let start, end
+
     start = match.indices[0][0]
     end = match.indices[0][1]
     // First attribute has own group
@@ -241,6 +247,7 @@ function decoLine
     // Remaining attributes need to be split
     if (match.indices.length > 2) {
       let group2
+
       group2 = match.indices[2]
       if (group2[0] == group2[1])
         return
@@ -260,14 +267,17 @@ function decoLine
   }
 }
 
-function ansiDeco(view) {
+function ansiDeco
+(view) {
   let step, builder, cache
+
   step = view.state.facet(stepSize)
   builder = new RangeSetBuilder()
   cache = []
-  for (let {from, to} of view.visibleRanges)
+  for (let { from, to } of view.visibleRanges)
     for (let pos = from; pos <= to;) {
       let line
+
       line = view.state.doc.lineAt(pos)
       decoLine(builder, cache, line)
       pos = line.to + 1
@@ -277,14 +287,16 @@ function ansiDeco(view) {
 
 //!showAnsi
 
-import {ViewPlugin} from "@codemirror/view"
+import { ViewPlugin } from '@codemirror/view'
 
 const showAnsi = ViewPlugin.fromClass(class {
-  constructor(view) {
+  constructor
+  (view) {
     this.decorations = ansiDeco(view)
   }
 
-  update(update) {
+  update
+  (update) {
     if (update.docChanged || update.viewportChanged)
       this.decorations = ansiDeco(update.view)
   }
