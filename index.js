@@ -167,7 +167,7 @@ function decoLine
       return
     }
     // weight change
-    if ([1, 22].includes(num)) {
+    if ([ 1, 22 ].includes(num)) {
       if (num == 22) {
         // normal
         boldOff()
@@ -269,9 +269,8 @@ function decoLine
 
 function ansiDeco
 (view) {
-  let step, builder, cache
+  let builder, cache
 
-  step = view.state.facet(stepSize)
   builder = new RangeSetBuilder()
   cache = []
   for (let { from, to } of view.visibleRanges)
