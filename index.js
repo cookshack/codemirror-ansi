@@ -194,6 +194,8 @@ function decoLine
       fg = 0
       if (bg || bold)
         push({ from: from + len, to: to, fg: fg, bg: bg, bold: bold })
+      else
+        push({ bold: 0, fg: 0, bg: 0 }) // dummy, for cache
       return
     }
     // default bg
@@ -201,6 +203,8 @@ function decoLine
       bg = 0
       if (fg || bold)
         push({ from: from + len, to: to, fg: fg, bg: bg, bold: bold })
+      else
+        push({ bold: 0, fg: 0, bg: 0 }) // dummy, for cache
       return
     }
     // color
