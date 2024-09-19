@@ -152,7 +152,7 @@ function decoLine
 
   function add
   (from, len /* of marker */, to, num, init) {
-    d('add ' + from + ' ' + len + ' ' + to + ' ' + num + ' ' + init)
+    //d('add ' + from + ' ' + len + ' ' + to + ' ' + num + ' ' + init)
     // terminate previous
     if (init) {
       // skip because initializing line with cached info from previous line
@@ -247,7 +247,7 @@ function decoLine
   bg = hit?.bg || 0
   bold = hit?.bold || 0
   if (hit) {
-    if (1) {
+    if (0) {
       d('hit ' + line.number)
       d('fg ' + hit.fg)
       d('bg ' + hit.bg)
@@ -292,7 +292,7 @@ function decoLine
     filtered = ranges.filter(r => r.cache)
     if (filtered.length) {
       cache[line.number] = filtered.at(-1)
-      if (1) {
+      if (0) {
         d('cached ' + line.number)
         d('fg ' + cache[line.number].fg)
         d('bg ' + cache[line.number].bg)
